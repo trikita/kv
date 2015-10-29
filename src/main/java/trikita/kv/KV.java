@@ -11,7 +11,7 @@ public final class KV {
 		public List<String> keys(String mask);
 	}
 
-	public interface Transform {
+	public interface Middleware {
 		public byte[] encode(String key, byte[] input);
 		public byte[] decode(String key, byte[] input);
 	}
@@ -22,11 +22,11 @@ public final class KV {
 	}
 
 	private Storage mStorage;
-	private Transform[] mTransforms;
+	private Middleware[] mMiddlewares;
 	private Encoder mEncoder;
 
-	public KV(Storage storage, Encoder enc, Transform ...t) {
-		mTransforms = t;
+	public KV(Storage storage, Encoder enc, Middleware ...t) {
+		mMiddlewares = t;
 		mEncoder = enc;
 		mStorage = storage;
 	}
@@ -37,7 +37,7 @@ public final class KV {
 			return this;
 		}
 		byte[] data = mEncoder.encode(key, value);
-		for (Transform t : mTransforms) {
+		for (Middleware t : mMiddlewares) {
 			data = t.encode(key, data);
 		}
 		mStorage.set(key, data);
@@ -49,7 +49,7 @@ public final class KV {
 		if (data == null) {
 			return null;
 		}
-		for (Transform t : mTransforms) {
+		for (Middleware t : mMiddlewares) {
 			data = t.decode(key, data);
 		}
 		return mEncoder.decode(key, data);
