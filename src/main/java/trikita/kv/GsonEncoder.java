@@ -29,9 +29,9 @@ public class GsonEncoder implements KV.Encoder {
 	}
 
 	private static class GsonTypeWrapper<T> {
-		String type;
-		String[] paramTypes;
-		T value;
+		private String type;
+		private String[] paramTypes;
+		private T value;
 		public GsonTypeWrapper(String type, T value) {
 			this.type = type;
 			this.value = value;
