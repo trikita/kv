@@ -19,25 +19,6 @@ import java.util.Set;
 
 public class GsonEncoder implements KV.Encoder {
 
-	private static final Gson gson;
-
-	static {
-		GsonBuilder builder = new GsonBuilder();
-		builder.registerTypeAdapter(GsonTypeWrapper.class,
-				new GsonTypeWrapperDeserializer());
-		gson = builder.create();
-	}
-
-	private static class GsonTypeWrapper<T> {
-		private String type;
-		private String[] paramTypes;
-		private T value;
-		public GsonTypeWrapper(String type, T value) {
-			this.type = type;
-			this.value = value;
-		}
-	}
-
 	private static class ParameterizedTypeWrapper implements ParameterizedType {
 		private final Class<?> type;
 		private final Class<?>[] params;
@@ -59,16 +40,16 @@ public class GsonEncoder implements KV.Encoder {
 		}
 	}
 
-	private static class GsonTypeWrapperDeserializer
-			implements JsonDeserializer<GsonTypeWrapper<?>> {
-		public GsonTypeWrapper<?> deserialize(JsonElement el, Type type,
+	private class GsonTypeWrapperDeserializer
+			implements JsonDeserializer<GenericTypes.Wrapper<?>> {
+		public GenericTypes.Wrapper<?> deserialize(JsonElement el, Type type,
 				JsonDeserializationContext c) {
 			try {
 				Object value = null;
 				JsonObject meta = el.getAsJsonObject();
 				String typeName = meta.get("type").getAsString();
 				Class typeClass = Class.forName(typeName);
-				Class paramClasses[] = new Class[]{};
+				Class paramClasses[] = null;
 				if (meta.has("paramTypes")) {
 					JsonArray paramsArray = meta.get("paramTypes").getAsJsonArray();
 					paramClasses = new Class[paramsArray.size()];
@@ -76,62 +57,39 @@ public class GsonEncoder implements KV.Encoder {
 						paramClasses[i] = Class.forName(paramsArray.get(i).getAsString());
 					}
 				}
-				if (List.class.isAssignableFrom(typeClass) || 
-						Map.class.isAssignableFrom(typeClass) ||
-						Set.class.isAssignableFrom(typeClass)) {
+				if (paramClasses != null) {
 					value = gson.fromJson(meta.get("value"),
 							new ParameterizedTypeWrapper(typeClass, paramClasses));
 				} else {
 					value = gson.fromJson(meta.get("value"), typeClass);
 				}
-				return new GsonTypeWrapper(typeName, value);
+				return new GenericTypes.Wrapper(typeName, null, value);
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
 			}
 		}
 	}
 
-	// FIXME add BitSet
-	// FIXME add Queue
-	// FIXME add android.util.Pair
-	public <T> byte[] encode(String key, T value) {
-		GsonTypeWrapper<T> t = null;
+	private final Gson gson;
 
-    if (List.class.isAssignableFrom(value.getClass())) {
-      List<?> list = (List<?>) value;
-			t = new GsonTypeWrapper<>(list.getClass().getName(), value);
-      if (!list.isEmpty()) {
-        t.paramTypes = new String[]{list.get(0).getClass().getName()};
-      }
-    } else if (Map.class.isAssignableFrom(value.getClass())) {
-      Map<?, ?> map = (Map) value;
-      if (!map.isEmpty()) {
-				t = new GsonTypeWrapper<>(map.getClass().getName(), value);
-        for (Map.Entry<?, ?> entry : map.entrySet()) {
-					t.paramTypes = new String[]{
-						entry.getKey().getClass().getName(),
-						entry.getValue().getClass().getName(),
-					};
-          break;
-        }
-      }
-    } else if (Set.class.isAssignableFrom(value.getClass())) {
-      Set<?> set = (Set<?>) value;
-      if (!set.isEmpty()) {
-        Iterator<?> iterator = set.iterator();
-				t = new GsonTypeWrapper<>(set.getClass().getName(), value);
-        if (iterator.hasNext()) {
-          t.paramTypes = new String[]{iterator.next().getClass().getName()};
-        }
-      }
-    } else {
-			t = new GsonTypeWrapper<>(value.getClass().getName(), value);
-    }
-		return gson.toJson(t).getBytes();
+	public GsonEncoder() {
+		GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(GenericTypes.Wrapper.class,
+				new GsonTypeWrapperDeserializer());
+		this.gson = builder.create();
+	}
+
+	public GsonEncoder(Gson gson) {
+		this.gson = gson;
+	}
+
+	public <T> byte[] encode(String key, T value) {
+		return gson.toJson(GenericTypes.wrap(value)).getBytes();
 	}
 
 	public <T> T decode(String key, byte[] data) {
-		GsonTypeWrapper<T> t = gson.fromJson(new String(data), GsonTypeWrapper.class);
+		GenericTypes.Wrapper<T> t =
+			gson.fromJson(new String(data), GenericTypes.Wrapper.class);
 		return t.value;
 	}
 }

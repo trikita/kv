@@ -2,13 +2,14 @@ package trikita.kv;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public final class KV {
 
 	public interface Storage {
 		public void set(String key, byte[] value);
 		public byte[] get(String key);
-		public List<String> keys(String mask);
+		public Set<String> keys(String mask);
 	}
 
 	public interface Middleware {
@@ -55,7 +56,7 @@ public final class KV {
 		return mEncoder.decode(key, data);
 	}
 
-	public List<String> keys(String mask) {
+	public Set<String> keys(String mask) {
 		return mStorage.keys(mask);
 	}
 
