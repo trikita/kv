@@ -1,8 +1,11 @@
 package trikita.kv;
 
 import java.lang.Class;
+import java.util.ArrayDeque;
+import java.util.BitSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Queue;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -84,6 +87,44 @@ public class KVGsonTest {
 		Assert.assertEquals(u.get("user:2").name, "Jane Doe");
 		Assert.assertEquals(u.get("user:2").address.city, "New York");
 		Assert.assertEquals(u.get("user:2").address.zip, 10001);
+	}
+
+	@Test
+	public void testQueue() {
+		KV kv = new KV(new TestUtils.Storage(), new GsonEncoder());
+		Queue<User> q = new ArrayDeque<User>();
+		q.offer(new User("John Doe", new Address("Los Angeles", 90009)));
+		q.offer(new User("Jane Doe", new Address("New York", 10001)));
+		kv.set("users", q);
+		Assert.assertEquals(kv.keys("").size(), 1);
+		ArrayDeque<User> users = kv.get("users");
+		Assert.assertEquals(users.size(), 2);
+
+		User u;
+		u = q.poll();
+		Assert.assertEquals(u.name, "John Doe");
+		Assert.assertEquals(u.address.city, "Los Angeles");
+		Assert.assertEquals(u.address.zip, 90009);
+		u = q.poll();
+		Assert.assertEquals(u.name, "Jane Doe");
+		Assert.assertEquals(u.address.city, "New York");
+		Assert.assertEquals(u.address.zip, 10001);
+	}
+
+	@Test
+	public void testBitSet() {
+		KV kv = new KV(new TestUtils.Storage(), new GsonEncoder());
+		BitSet bs = new BitSet();
+		bs.set(31);
+		bs.set(1000);
+		kv.set("bits", bs);
+		Assert.assertEquals(kv.keys("").size(), 1);
+		BitSet bits = kv.get("bits");
+		Assert.assertTrue(bits != bs);
+		Assert.assertEquals(bits.size(), bs.size());
+		Assert.assertEquals(bits.get(0), false);
+		Assert.assertEquals(bits.get(31), true);
+		Assert.assertEquals(bits.get(1000), true);
 	}
 
 	@Test

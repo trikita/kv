@@ -28,9 +28,6 @@ public class GenericTypes {
 	public static final Map<Class, Extractor> TYPES = new HashMap<>();
 
 	static {
-		// TODO BitSet
-		// TODO Queue
-		// TODO android.util.Pair?
 		TYPES.put(List.class, new Extractor<List>() {
 			public Class[] getTypes(List list) {
 				if (!list.isEmpty()) {
