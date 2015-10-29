@@ -1,0 +1,10 @@
+apply plugin: 'java'
+
+repositories {
+	jcenter()
+}
+
+dependencies {
+  compile 'com.google.code.gson:gson:2.3.1'
+	testCompile 'junit:junit:4.12'
+}
