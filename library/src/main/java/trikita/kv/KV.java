@@ -1,7 +1,5 @@
 package trikita.kv;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 public final class KV {
@@ -23,9 +21,9 @@ public final class KV {
 		public <T> T decode(String key, byte[] data);
 	}
 
-	private Storage mStorage;
-	private Middleware[] mMiddlewares;
-	private Encoder mEncoder;
+	private final Storage mStorage;
+	private final Middleware[] mMiddlewares;
+	private final Encoder mEncoder;
 
 	public KV(Storage storage, Encoder enc, Middleware ...t) {
 		mMiddlewares = t;
@@ -33,7 +31,7 @@ public final class KV {
 		mStorage = storage;
 	}
 
-	public <T> KV set(String key, T value) {
+	public <T> KV set(final String key, final T value) {
 		if (value == null) {
 			mStorage.set(key, null);
 			return this;
@@ -46,7 +44,7 @@ public final class KV {
 		return this;
 	}
 
-	public <T> T get(String key) {
+	public <T> T get(final String key) {
 		byte[] data = mStorage.get(key);
 		if (data == null) {
 			return null;
@@ -57,7 +55,7 @@ public final class KV {
 		return mEncoder.decode(key, data);
 	}
 
-	public Set<String> keys(String mask) {
+	public Set<String> keys(final String mask) {
 		return mStorage.keys(mask);
 	}
 

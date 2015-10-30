@@ -1,5 +1,25 @@
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
+	}
+}
+
 apply plugin: 'java'
 apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+def GROUPID = 'co.trikita'
+def ARTIFACT = 'kv'
+def VERSION = '0.0.1'
+def DESCRIPTION = 'Tiny, simple and super flexible key-value storage for Android and JRE'
+def WEBURL = 'https://github.com/trikita/kv'
+def SCMURL = 'https://github.com/trikita/kv.git'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 repositories {
 	jcenter()
@@ -16,8 +36,74 @@ tasks.withType(Test) {
 	include "**/*Test.class"
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
 dependencies {
 	optional 'com.google.code.gson:gson:+'
 	optional fileTree(include: ['*.jar'], dir: System.getenv('ANDROID_HOME')+'/platforms/android-23')
 	testCompile 'junit:junit:+'
 }
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			groupId GROUPID
+			artifactId ARTIFACT
+			version VERSION
+			artifact sourcesJar
+			artifact javadocJar
+			pom.withXml {
+				def root = asNode()
+				root.appendNode('name', ARTIFACT)
+				root.appendNode('description', DESCRIPTION)
+				root.appendNode('url', WEBURL)
+				def dev = root.appendNode('developers').appendNode('developer')
+				dev.appendNode('id', 'trikita')
+				dev.appendNode('name', 'Trikita')
+				dev.appendNode('email', 'zaitsev.serge@gmail.com')
+				def scm = root.appendNode('scm')
+				scm.appendNode('url', SCMURL)
+				def license = root.appendNode('licenses').appendNode('license')
+				license.appendNode('name', 'MIT License')
+				license.appendNode('url', 'http://www.opensource.org/licenses/mit-license.php')
+			}
+		}
+	}
+}
+
+bintray {
+	user = project.hasProperty('bintrayUser') ? bintrayUser : ''
+	key = project.hasProperty('bintrayApiKey') ? bintrayApiKey : ''
+	publications = ['mavenJava']
+	pkg {
+		repo = 'maven'
+		name = 'kv'
+		websiteUrl = WEBURL
+		vcsUrl = SCMURL
+		licenses = ['MIT']
+		publish = true
+		version {
+			name = project.version
+			gpg {
+				sign = true
+				passphrase = project.hasProperty('bintrayGpgPassword') ? bintrayGpgPassword : ''
+			}
+			mavenCentralSync {
+				sync = true
+				user = project.hasProperty('bintrayOssUser') ? bintrayOssUser : ''
+				password = project.hasProperty('bintrayOssPassword') ? bintrayOssPassword : ''
+				close = '1'
+			}
+		}
+	}
+}
+
