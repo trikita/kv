@@ -33,7 +33,6 @@ public class MainActivity extends Activity {
 				new SerializedEncoder());
 	private KV prefDB;
 
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

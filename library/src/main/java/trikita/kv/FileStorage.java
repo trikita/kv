@@ -96,6 +96,7 @@ public class FileStorage implements KV.Storage {
 
 	public void close() {
 		try {
+			mService.shutdown();
 			mStream.flush();
 			mStream.close();
 		} catch (IOException e) {
