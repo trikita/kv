@@ -10,11 +10,11 @@ import java.util.Queue;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class KVGsonTest {
+public class KVSerializedTest {
 
 	@Test
 	public void testPrimitives() {
-		KV kv = new KV(new TestUtils.Storage(), new GsonEncoder());
+		KV kv = new KV(new TestUtils.Storage(), new SerializedEncoder());
 		kv.set("str", "hello world");
 		kv.set("int", 12);
 		kv.set("num", 3.1415926f);
@@ -35,7 +35,7 @@ public class KVGsonTest {
 
 	@Test
 	public void testObject() {
-		KV kv = new KV(new TestUtils.Storage(), new GsonEncoder());
+		KV kv = new KV(new TestUtils.Storage(), new SerializedEncoder());
 		kv.set("user:1", new TestUtils.User("John Doe", "Los Angeles", 90009));
 		kv.set("user:2", new TestUtils.User("Jane Doe", "New York", 10001));
 		Assert.assertEquals(kv.keys("").size(), 2);
@@ -53,7 +53,7 @@ public class KVGsonTest {
 
 	@Test
 	public void testArray() {
-		KV kv = new KV(new TestUtils.Storage(), new GsonEncoder());
+		KV kv = new KV(new TestUtils.Storage(), new SerializedEncoder());
 		TestUtils.User[] users = new TestUtils.User[]{
 			new TestUtils.User("John Doe", "Los Angeles", 90009),
 			new TestUtils.User("Jane Doe", "New York", 10001),
@@ -73,7 +73,7 @@ public class KVGsonTest {
 
 	@Test
 	public void testMap() {
-		KV kv = new KV(new TestUtils.Storage(), new GsonEncoder());
+		KV kv = new KV(new TestUtils.Storage(), new SerializedEncoder());
 		Map<String, TestUtils.User> users = new LinkedHashMap<String, TestUtils.User>();
 		users.put("user:1", new TestUtils.User("John Doe", "Los Angeles", 90009));
 		users.put("user:2", new TestUtils.User("Jane Doe", "New York", 10001));
@@ -91,7 +91,7 @@ public class KVGsonTest {
 
 	@Test
 	public void testQueue() {
-		KV kv = new KV(new TestUtils.Storage(), new GsonEncoder());
+		KV kv = new KV(new TestUtils.Storage(), new SerializedEncoder());
 		Queue<TestUtils.User> q = new ArrayDeque<TestUtils.User>();
 		q.offer(new TestUtils.User("John Doe", "Los Angeles", 90009));
 		q.offer(new TestUtils.User("Jane Doe", "New York", 10001));
@@ -113,7 +113,7 @@ public class KVGsonTest {
 
 	@Test
 	public void testBitSet() {
-		KV kv = new KV(new TestUtils.Storage(), new GsonEncoder());
+		KV kv = new KV(new TestUtils.Storage(), new SerializedEncoder());
 		BitSet bs = new BitSet();
 		bs.set(31);
 		bs.set(1000);
@@ -137,7 +137,7 @@ public class KVGsonTest {
 			}
 		});
 
-		KV kv = new KV(new TestUtils.Storage(), new GsonEncoder());
+		KV kv = new KV(new TestUtils.Storage(), new SerializedEncoder());
 		TestUtils.Pair<String, TestUtils.User> user =
 			new TestUtils.Pair<>("user",
 					new TestUtils.User("John Doe", "Los Angeles", 90009));
@@ -150,4 +150,5 @@ public class KVGsonTest {
 		Assert.assertEquals(pair.second.address.zip, 90009);
 	}
 }
+
 

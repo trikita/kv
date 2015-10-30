@@ -63,10 +63,11 @@ public final class KV {
 	// TODO rlock(), lock(), unlock, runlock()
 	// TODO storage sharedprefs
 	// TODO storage sqlite
+	// TODO storage AOF
+	// TODO storage directory with plain files
 	// TODO storage with lru cache
 	// TODO transform for gzip
 	// TODO transform for base64
-	// TODO transform for aes?
+	// TODO transform for aes
 	// TODO encoder for jackson
-	// TODO encoder for serializable
 }

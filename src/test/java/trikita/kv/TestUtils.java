@@ -1,5 +1,6 @@
 package trikita.kv;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +26,35 @@ public final class TestUtils {
 		}
 		public <T> T decode(String key, byte[] data) {
 			return null;
+		}
+	}
+
+	// Test data classes
+
+	public static class User implements Serializable {
+		public final String name;
+		public final Address address;
+		public User(String name, String city, int zip) {
+			this.name = name;
+			this.address = new Address(city, zip);
+		}
+	}
+
+	public static class Address implements Serializable {
+		public final String city;
+		public final int zip;
+		public Address(String city, int zip) {
+			this.city = city;
+			this.zip = zip;
+		}
+	}
+
+	public static class Pair<U, V> implements Serializable {
+		public final U first;
+		public final V second;
+		public Pair(U u, V v) {
+			this.first = u;
+			this.second = v;
 		}
 	}
 }
