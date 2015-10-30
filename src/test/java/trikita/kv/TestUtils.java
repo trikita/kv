@@ -18,6 +18,7 @@ public final class TestUtils {
 		public Set<String> keys(String mask) {
 			return m.keySet();
 		}
+		public void close() {}
 	}
 
 	public final static class NullEncoder implements KV.Encoder {

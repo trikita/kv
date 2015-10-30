@@ -10,6 +10,7 @@ public final class KV {
 		public void set(String key, byte[] value);
 		public byte[] get(String key);
 		public Set<String> keys(String mask);
+		public void close();
 	}
 
 	public interface Middleware {
@@ -58,6 +59,10 @@ public final class KV {
 
 	public Set<String> keys(String mask) {
 		return mStorage.keys(mask);
+	}
+
+	public void close() {
+		mStorage.close();
 	}
 
 	// TODO rlock(), lock(), unlock, runlock()
