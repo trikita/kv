@@ -1,10 +1,23 @@
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 repositories {
 	jcenter()
 }
 
+configurations {
+	optional
+	compile.extendsFrom optional
+}
+
+// This fixes issues with android.jar classes being loaded during test
+tasks.withType(Test) {
+	scanForTestClasses = false
+	include "**/*Test.class"
+}
+
 dependencies {
-  compile 'com.google.code.gson:gson:2.3.1'
-	testCompile 'junit:junit:4.12'
+	optional 'com.google.code.gson:gson:+'
+	optional fileTree(include: ['*.jar'], dir: System.getenv('ANDROID_HOME')+'/platforms/android-23')
+	testCompile 'junit:junit:+'
 }
