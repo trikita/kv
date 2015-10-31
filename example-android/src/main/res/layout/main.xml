@@ -7,7 +7,24 @@
 	<TextView
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="Hello World, MainActivity"
+		android:text="Benchmark"
 		/>
+	<Button
+		android:id="@+id/start_button"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Start"
+		/>
+	<ScrollView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:scrollbars="vertical"
+		android:fillViewport="true">
+		<TextView
+			android:id="@+id/results"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			/>
+	</ScrollView>
 </LinearLayout>
 
