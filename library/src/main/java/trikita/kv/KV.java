@@ -11,22 +11,15 @@ public final class KV {
 		public void close();
 	}
 
-	public interface Middleware {
-		public byte[] encode(String key, byte[] input);
-		public byte[] decode(String key, byte[] input);
-	}
-
 	public interface Encoder {
 		public <T> byte[] encode(String key, T value);
 		public <T> T decode(String key, byte[] data);
 	}
 
 	private final Storage mStorage;
-	private final Middleware[] mMiddlewares;
 	private final Encoder mEncoder;
 
-	public KV(Storage storage, Encoder enc, Middleware ...t) {
-		mMiddlewares = t;
+	public KV(Storage storage, Encoder enc) {
 		mEncoder = enc;
 		mStorage = storage;
 	}
@@ -36,11 +29,7 @@ public final class KV {
 			mStorage.set(key, null);
 			return this;
 		}
-		byte[] data = mEncoder.encode(key, value);
-		for (Middleware t : mMiddlewares) {
-			data = t.encode(key, data);
-		}
-		mStorage.set(key, data);
+		mStorage.set(key, mEncoder.encode(key, value));
 		return this;
 	}
 
@@ -48,9 +37,6 @@ public final class KV {
 		byte[] data = mStorage.get(key);
 		if (data == null) {
 			return null;
-		}
-		for (Middleware t : mMiddlewares) {
-			data = t.decode(key, data);
 		}
 		return mEncoder.decode(key, data);
 	}
