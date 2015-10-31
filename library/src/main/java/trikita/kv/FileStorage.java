@@ -19,96 +19,88 @@ import java.util.Set;
 
 public class FileStorage implements KV.Storage {
 
+	private final File mFile;
 	private final Map<String, byte[]> mCache = new HashMap<>();
-	private final DataOutputStream mStream;
-	private final ExecutorService mService = Executors.newSingleThreadExecutor();
+
+	private DataOutputStream mStream;
 
 	public FileStorage(final File f) {
-		mStream = wait(mService.submit(new Callable<DataOutputStream>() {
-			public DataOutputStream call() {
-				DataInputStream in = null;
-				try {
-					in = new DataInputStream(new FileInputStream(f));
-					while (true) {
-						int size;
-						try {
-							size = in.readInt();
-						} catch (EOFException e) {
-							break;
-						}
-						String key = in.readUTF();
-						if (size == -1) {
-							mCache.remove(key);
-						} else {
-							byte[] value = new byte[size];
-							in.readFully(value);
-							mCache.put(key, value);
-						}
-					}
-				} catch (IOException err) {
-					try {
-						if (in != null) {
-							in.close();
-						}
-					} catch (IOException e) {}
-				}
+		mFile = f;
+	}
 
-				try {
-					return new DataOutputStream(new FileOutputStream(f, true));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+	private void lazyLoad() {
+		if (mStream == null) {
+			DataInputStream in = null;
+			try {
+				in = new DataInputStream(new FileInputStream(mFile));
+				while (true) {
+					int size;
+					try {
+						size = in.readInt();
+					} catch (EOFException e) {
+						break;
+					}
+					String key = in.readUTF();
+					if (size == -1) {
+						mCache.remove(key);
+					} else {
+						byte[] value = new byte[size];
+						in.readFully(value);
+						mCache.put(key, value);
+					}
 				}
+			} catch (IOException err) {
+				try {
+					if (in != null) {
+						in.close();
+					}
+				} catch (IOException e) {}
 			}
-		}));
+
+			try {
+				mStream = new DataOutputStream(new FileOutputStream(mFile, true));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	public void set(final String key, final byte[] value) {
-		if (value == null) {
-			mCache.remove(key, value);
-		} else {
-			mCache.put(key, value);
-		}
-		wait(mService.submit(new Runnable() {
-			public void run() {
-				try {
-					if (value == null) {
-						mStream.writeInt(-1);
-						mStream.writeUTF(key);
-					} else {
-						mStream.writeInt(value.length);
-						mStream.writeUTF(key);
-						mStream.write(value, 0, value.length);
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}));
-	}
-
-	public byte[] get(String key) {
-		return mCache.get(key);
-	}
-
-	public Set<String> keys(String mask) {
-		return mCache.keySet();
-	}
-
-	public void close() {
 		try {
-			mService.shutdown();
-			mStream.flush();
-			mStream.close();
+			lazyLoad();
+			if (value == null) {
+				mCache.remove(key, value);
+				mStream.writeInt(-1);
+				mStream.writeUTF(key);
+			} else {
+				mCache.put(key, value);
+				mStream.writeInt(value.length);
+				mStream.writeUTF(key);
+				mStream.write(value, 0, value.length);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private <T> T wait(Future<T> future) {
+	public byte[] get(String key) {
+		lazyLoad();
+		return mCache.get(key);
+	}
+
+	public Set<String> keys(String mask) {
+		lazyLoad();
+		return mCache.keySet();
+	}
+
+	public void close() {
 		try {
-			return future.get();
-		} catch (InterruptedException|ExecutionException e) {
-			throw new RuntimeException(e);
+			if (mStream != null) {
+				mStream.flush();
+				mStream.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
