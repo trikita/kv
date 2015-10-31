@@ -8,14 +8,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.orhanobut.hawk.Hawk;
+import com.orhanobut.hawk.HawkBuilder;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 import trikita.kv.FileStorage;
+import trikita.kv.GsonEncoder;
 import trikita.kv.KV;
 import trikita.kv.LruStorage;
-import trikita.kv.GsonEncoder;
 import trikita.kv.SerializedEncoder;
 import trikita.kv.SharedPrefsStorage;
 import trikita.kv.SqliteStorage;
@@ -77,6 +80,20 @@ public class MainActivity extends Activity {
 							new GsonEncoder());
 						benchKV("Sqlite+LRU/Gson", kv, sb);
 						publishProgress();
+
+						Hawk.init(MainActivity.this)
+							.setStorage(HawkBuilder.newSharedPrefStorage(MainActivity.this))
+							.build();
+						benchHawk("Hawk/SharedPrefs", sb);
+						Hawk.clear();
+						publishProgress();
+
+						Hawk.init(MainActivity.this)
+								.setStorage(HawkBuilder.newSqliteStorage(MainActivity.this))
+								.build();
+						benchHawk("Hawk/Sqlite", sb);
+						publishProgress();
+						Hawk.clear();
 						return null;
 					}
 
@@ -137,6 +154,53 @@ public class MainActivity extends Activity {
 			}
 		}, 1));
 		kv.close();
+	}
+
+	private void benchHawk(String name, StringBuilder out) {
+		out.append("=== TEST: " + name + "\n");
+		out.append(bench("SET primitives", new Runnable() {
+			public void run() {
+				Hawk.put("foo", "bar");
+				Hawk.put("bar", true);
+				Hawk.put("baz", 123);
+			}
+		}, 3));
+
+		out.append(bench("GET primitives", new Runnable() {
+			public void run() {
+				String s = Hawk.get("foo");
+				boolean b = Hawk.get("bar");
+				int n = Hawk.get("baz");
+			}
+		}, 3));
+
+		out.append(bench("SET object", new Runnable() {
+			public void run() {
+				Hawk.put("user", new User("John", "Doe"));
+			}
+		}, 1));
+
+		out.append(bench("GET object", new Runnable() {
+			public void run() {
+				User u = Hawk.get("user");
+			}
+		}, 1));
+
+		final ArrayList<User> users = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+			users.add(new User("John", "Doe"+i));
+		}
+		out.append(bench("SET list", new Runnable() {
+			public void run() {
+				Hawk.put("users", users);
+			}
+		}, 1));
+
+		out.append(bench("GET list", new Runnable() {
+			public void run() {
+				ArrayList<User> u = Hawk.get("users");
+			}
+		}, 1));
 	}
 
 	private String bench(String name, Runnable r, int ops) {
