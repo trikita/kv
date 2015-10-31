@@ -48,7 +48,7 @@ public class SqliteStorage implements KV.Storage {
 			db.execSQL("CREATE TABLE " + TABLE +
 					" ( " + KEY + " text primary key not null, " +
 					VALUE + " blob null, unique(" +
-					KEY + "), on conflict replace);");
+					KEY + ") on conflict replace);");
 		}
 
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
