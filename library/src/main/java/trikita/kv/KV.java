@@ -41,6 +41,11 @@ public final class KV {
 		return mEncoder.decode(key, data);
 	}
 
+	public <T> T get(final String key, T defValue) {
+		T value = get(key);
+		return (value == null ? defValue : value);
+	}
+
 	public Set<String> keys(final String mask) {
 		return mStorage.keys(mask);
 	}
