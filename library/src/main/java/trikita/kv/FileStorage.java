@@ -69,7 +69,7 @@ public class FileStorage implements KV.Storage {
 		try {
 			lazyLoad();
 			if (value == null) {
-				mCache.remove(key, value);
+				mCache.remove(key);
 				mStream.writeInt(-1);
 				mStream.writeUTF(key);
 			} else {
