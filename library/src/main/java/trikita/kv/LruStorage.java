@@ -24,7 +24,7 @@ public class LruStorage extends LinkedHashMap<String, byte[]>
 
 	public void set(final String key, final byte[] value) {
 		if (value == null) {
-			this.remove(key, value);
+			this.remove(key);
 		} else {
 			this.put(key, value);
 		}
