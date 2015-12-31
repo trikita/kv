@@ -19,7 +19,11 @@ public class SharedPrefsStorage implements KV.Storage {
 	}
 
 	public byte[] get(String key) {
-		return Base64.decode(mPrefs.getString(key, ""), Base64.DEFAULT);
+		if (mPrefs.contains(key)) {
+			return Base64.decode(mPrefs.getString(key, ""), Base64.DEFAULT);
+		} else {
+			return null;
+		}
 	}
 
 	public Set<String> keys(String mask) {
