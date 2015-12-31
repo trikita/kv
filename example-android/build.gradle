@@ -10,7 +10,7 @@ apply plugin: 'com.android.application'
 
 android {
 	compileSdkVersion 'android-23'
-	buildToolsVersion '23.0.0 rc3'
+	buildToolsVersion '23.0.2'
 
 	defaultConfig {
 		minSdkVersion 9
@@ -32,6 +32,6 @@ repositories {
 }
 
 dependencies {
-	compile 'co.trikita:kv:+'
+	compile project(':library')
 	compile 'com.github.orhanobut:hawk:1.19'
 }
