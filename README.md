@@ -4,10 +4,6 @@ The most simple Key-Value store for Android and Java.
 
 ## Usage
 
-```gradle
-TODO
-```
-
 ```java
 // Create new store using the given storage and encoder implementation
 KV kv = new KV(new FileStorage(new File("store.kv")), new SerializedEncoder());
@@ -31,7 +27,7 @@ read from the storage and decoded.
 
 ## Storage
 
-``java
+```java
 public interface Storage {
 	void set(String key, byte[] value);
 	byte[] get(String key);
